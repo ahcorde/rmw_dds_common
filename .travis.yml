@@ -9,7 +9,7 @@ env:
     - AMENT_WS_SRC=${AMENT_WS}/src
 install:
   - sudo apt-get update -qq
-  - sudo apt-get install cmake cppcheck libxml2-utils python3 python3-pip python3-empy python3-pyparsing python3-setuptools wget python3-vcstool
+  - sudo apt-get install cmake cppcheck libxml2-utils python3 python3-pip python3-empy python3-pyparsing python3-setuptools wget python-vcstool
   - python3 --version
   - sudo -H python3 -m pip install -U setuptools pip pyparsing
   - sudo -H python3 -m pip install catkin_pkg EmPy
