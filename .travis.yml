@@ -1,0 +1,33 @@
+sudo: required
+language: generic
+os:
+  - linux
+dist: bionic
+env:
+  global:
+    - AMENT_WS=~/ament_ws
+    - AMENT_WS_SRC=${AMENT_WS}/src
+install:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        sudo apt-get update -qq
+        sudo apt-get install cmake cppcheck libxml2-utils python3 python3-pip python3-empy python3-pyparsing python3-setuptools wget python3-vcstool
+  - python3 --version
+  - sudo -H python3 -m pip install -U setuptools pip pyparsing
+  - sudo -H python3 -m pip install catkin_pkg EmPy
+  - sudo -H python3 -m pip install -U colcon-bash colcon-core colcon-defaults colcon-library-path colcon-metadata colcon-output colcon-package-information colcon-package-selection colcon-parallel-executor colcon-python-setup-py colcon-recursive-crawl colcon-test-result colcon-cmake colcon-ros
+  - sudo -H python3 -m pip install -U flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes pytest pytest-repeat pytest-rerunfailures pytest-cov pytest-runner setuptools
+script:
+  - mkdir -p $AMENT_WS_SRC
+  - cd AMENT_WS
+  - wget https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
+  - vcs import src < ros2.repos
+  - rm -r src/ros/pluginlib
+  # Link source into workspace's source space
+  - ln -s $TRAVIS_BUILD_DIR ./src
+  # Build
+  - colcon build --packages-up-to pluginlib --packages-skip pluginlib
+  - colcon build --packages-select pluginlib --event-handlers console_direct+
+  # Test
+  - colcon test --packages-select pluginlib --event-handlers console_direct+
+  - colcon test-result --test-result-base build
