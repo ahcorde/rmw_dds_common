@@ -24,13 +24,12 @@ script:
   - cd $AMENT_WS
   - wget https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
   - vcs import src < ros2.repos
-  - sudo rm -r src/ros/pluginlib
+  - sudo rm -r src/ros2/rmw_dds_common
   # Link source into workspace's source space
-  - ln -s $TRAVIS_BUILD_DIR ./src/pluginlib
-  - ls -R src
+  - ln -s $TRAVIS_BUILD_DIR ./src
   # Build
-  - colcon build --packages-up-to pluginlib --packages-skip pluginlib
-  - colcon build --packages-select pluginlib --event-handlers console_direct+
+  - colcon build --packages-up-to rmw_dds_common --packages-skip rmw_dds_common
+  - colcon build --packages-select rmw_dds_common --event-handlers console_direct+
   # Test
-  - colcon test --packages-select pluginlib --event-handlers console_direct+
+  - colcon test --packages-select rmw_dds_common --event-handlers console_direct+
   - colcon test-result --test-result-base build
