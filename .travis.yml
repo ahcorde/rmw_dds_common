@@ -24,7 +24,7 @@ script:
   - cd $AMENT_WS
   - wget https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
   - vcs import src < ros2.repos
-  - rm -r src/ros/pluginlib
+  - sudo rm -r src/ros/pluginlib
   # Link source into workspace's source space
   - ln -s $TRAVIS_BUILD_DIR ./src
   # Build
