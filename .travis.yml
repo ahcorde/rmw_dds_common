@@ -13,7 +13,7 @@ install:
   - curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
   - sudo sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
   - sudo apt-get update -qq
-  - sudo apt-get install -y cmake cppcheck libxml2-utils python3 python3-pip python3-empy python3-pyparsing python3-setuptools wget python3-vcstool libasio-dev libcunit1-dev libtinyxml2-dev
+  - sudo apt-get install -y cmake cppcheck libxml2-utils python3 python3-pip python3-empy python3-pyparsing python3-setuptools wget python3-vcstool libasio-dev libcunit1-dev libtinyxml2-dev python3-rosdep
   - python3 --version
   - sudo -H python3 -m pip install -U setuptools pip pyparsing
   - sudo -H python3 -m pip install catkin_pkg EmPy
