@@ -26,7 +26,8 @@ script:
   - vcs import src < ros2.repos
   - sudo rm -r src/ros/pluginlib
   # Link source into workspace's source space
-  - ln -s $TRAVIS_BUILD_DIR ./src
+  - ln -s $TRAVIS_BUILD_DIR ./src/pluginlib
+  - ls -R src
   # Build
   - colcon build --packages-up-to pluginlib --packages-skip pluginlib
   - colcon build --packages-select pluginlib --event-handlers console_direct+
