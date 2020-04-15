@@ -16,7 +16,9 @@
 
 #include "rmw_dds_common/gid_utils.hpp"
 
-using namespace rmw_dds_common;
+using rmw_dds_common::Compare_rmw_gid_t;
+using rmw_dds_common::operator==;
+using rmw_dds_common::operator<<;
 
 TEST(test_gid_utils, test_gid_operators)
 {
