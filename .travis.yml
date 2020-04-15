@@ -27,6 +27,9 @@ script:
   - sudo rm -r src/ros2/rmw_dds_common
   # Link source into workspace's source space
   - ln -s $TRAVIS_BUILD_DIR ./src
+  - sudo rosdep init
+  - rosdep update
+  - rosdep install --from-paths src --ignore-src --rosdistro foxy -y --skip-keys "console_bridge fastcdr fastrtps libopensplice67 libopensplice69 rti-connext-dds-5.3.1 urdfdom_headers"
   # Build
   - colcon build --packages-up-to rmw_dds_common --packages-skip rmw_dds_common
   - colcon build --packages-select rmw_dds_common --event-handlers console_direct+
