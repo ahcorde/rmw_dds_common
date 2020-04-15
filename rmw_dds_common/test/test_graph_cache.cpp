@@ -24,10 +24,9 @@
 #include "rmw/qos_profiles.h"
 #include "rmw/topic_endpoint_info.h"
 #include "rmw/topic_endpoint_info_array.h"
+#include "./allocator_testing_utils.h"
 
 #include "rmw_dds_common/graph_cache.hpp"
-
-#include "allocator_testing_utils.h"
 
 using rmw_dds_common::GraphCache;
 
@@ -1224,5 +1223,4 @@ TEST(test_failing_allocators, failing_allocators)
     EXPECT_EQ(ret, RMW_RET_INVALID_ARGUMENT);
     rcutils_reset_error();
   }
-
 }
