@@ -27,6 +27,8 @@
 
 #include "rmw_dds_common/graph_cache.hpp"
 
+#include "allocator_testing_utils.h"
+
 using rmw_dds_common::GraphCache;
 
 struct NameAndNamespace
@@ -1126,4 +1128,101 @@ TEST(test_graph_cache, normal_usage)
   check_results_by_topic(graph_cache, "topic3", 0, 0);
   check_results_by_topic(graph_cache, "topic4", 0, 0);
   check_results_by_topic(graph_cache, "some_topic", 0, 0);
+}
+
+TEST(test_graph_cache, test_operator)
+{
+  GraphCache graph_cache;
+
+  // Add one participant.
+  add_participants(graph_cache, {"participant1"});
+
+  std::string graph_cache_case1_str = "---------------------------------\n"
+    "Graph cache:\n"
+    "  Discovered data writers:\n"
+    "  Discovered data readers:\n"
+    "  Discovered participants:\n"
+    "    gid: '70.61.72.74.69.63.69.70.61.6e.74.31.0.0.0.0.0.0.0.0.0.0.0.0\n"
+    "    enclave name '\n"
+    "    nodes:\n"
+    "---------------------------------\n";
+
+  std::ostringstream stream_case1;
+  stream_case1 << graph_cache;
+  ASSERT_STREQ(stream_case1.str().c_str(), graph_cache_case1_str.c_str());
+
+  std::string graph_cache_case2_str = "---------------------------------\n"
+    "Graph cache:\n"
+    "  Discovered data writers:\n"
+    "  Discovered data readers:\n"
+    "  Discovered participants:\n"
+    "    gid: '70.61.72.74.69.63.69.70.61.6e.74.31.0.0.0.0.0.0.0.0.0.0.0.0\n"
+    "    enclave name '\n"
+    "    nodes:\n"
+    "      namespace: 'ns1' name: 'node1'\n"
+    "      associated data readers gids:\n"
+    "      associated data writers gids:\n"
+    "      namespace: 'ns1' name: 'node2'\n"
+    "      associated data readers gids:\n"
+    "      associated data writers gids:\n"
+    "      namespace: 'ns2' name: 'node1'\n"
+    "      associated data readers gids:\n"
+    "      associated data writers gids:\n"
+    "---------------------------------\n";
+
+  // Add some nodes.
+  check_participant_entities_msg(
+    add_nodes(
+      graph_cache, {
+    {"participant1", "ns1", "node1"},
+    {"participant1", "ns1", "node2"},
+    {"participant1", "ns2", "node1"}}),
+  {
+    "participant1", {
+      {"ns1", "node1", {}, {}},
+      {"ns1", "node2", {}, {}},
+      {"ns2", "node1", {}, {}},
+    }
+  });
+
+  std::ostringstream stream_case2;
+  stream_case2 << graph_cache;
+  ASSERT_STREQ(stream_case2.str().c_str(), graph_cache_case2_str.c_str());
+}
+
+TEST(test_failing_allocators, failing_allocators)
+{
+  GraphCache graph_cache;
+
+  {
+    rcutils_allocator_t failing_allocator = get_failing_allocator();
+    rcutils_string_array_t names = rcutils_get_zero_initialized_string_array();
+    rcutils_string_array_t namespaces = rcutils_get_zero_initialized_string_array();
+    rmw_ret_t ret = graph_cache.get_node_names(&names, &namespaces, nullptr, &failing_allocator);
+    EXPECT_EQ(ret, RMW_RET_BAD_ALLOC);
+    rcutils_reset_error();
+  }
+
+  {
+    rcutils_allocator_t allocator = rcutils_get_default_allocator();
+    rcutils_string_array_t names = rcutils_get_zero_initialized_string_array();
+    rmw_ret_t ret = rcutils_string_array_init(&names, 3, &allocator);
+    EXPECT_EQ(ret, RMW_RET_OK);
+    rcutils_string_array_t namespaces = rcutils_get_zero_initialized_string_array();
+    ret = graph_cache.get_node_names(&names, &namespaces, nullptr, &allocator);
+    EXPECT_EQ(ret, RMW_RET_INVALID_ARGUMENT);
+    rcutils_reset_error();
+  }
+
+  {
+    rcutils_allocator_t allocator = rcutils_get_default_allocator();
+    rcutils_string_array_t names = rcutils_get_zero_initialized_string_array();
+    rcutils_string_array_t namespaces = rcutils_get_zero_initialized_string_array();
+    rmw_ret_t ret = rcutils_string_array_init(&namespaces, 3, &allocator);
+    EXPECT_EQ(ret, RMW_RET_OK);
+    ret = graph_cache.get_node_names(&names, &namespaces, nullptr, &allocator);
+    EXPECT_EQ(ret, RMW_RET_INVALID_ARGUMENT);
+    rcutils_reset_error();
+  }
+
 }
