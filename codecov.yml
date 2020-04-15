@@ -1,2 +1,2 @@
 fixes:
-  - "ros_ws/src/rmw_dds_common/::"
+  - "ros_ws/src/rmw_dds_common/rmw_dds_common/::"
