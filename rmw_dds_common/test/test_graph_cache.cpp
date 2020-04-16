@@ -1187,6 +1187,51 @@ TEST(test_graph_cache, test_operator)
   std::ostringstream stream_case2;
   stream_case2 << graph_cache;
   ASSERT_STREQ(stream_case2.str().c_str(), graph_cache_case2_str.c_str());
+
+  std::string graph_cache_case3_str = "---------------------------------\n"
+  "Graph cache:\n"
+  "  Discovered data writers:\n"
+  "    gid: '77.72.69.74.65.72.31.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0',"
+  " topic name: 'topic1', topic_type: 'Str'\n"
+  "  Discovered data readers:\n"
+  "    gid: '72.65.61.64.65.72.31.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0',"
+  " topic name: 'topic1', topic_type: 'Str'\n"
+  "  Discovered participants:\n"
+  "    gid: '70.61.72.74.69.63.69.70.61.6e.74.31.0.0.0.0.0.0.0.0.0.0.0.0\n"
+  "    enclave name '\n"
+  "    nodes:\n"
+  "      namespace: 'ns1' name: 'node1'\n"
+  "      associated data readers gids:\n"
+  "        72.65.61.64.65.72.31.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\n"
+  "      associated data writers gids:\n"
+  "      namespace: 'ns1' name: 'node2'\n"
+  "      associated data readers gids:\n"
+  "      associated data writers gids:\n"
+  "        77.72.69.74.65.72.31.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0\n"
+  "      namespace: 'ns2' name: 'node1'\n"
+  "      associated data readers gids:\n"
+  "      associated data writers gids:\n"
+  "---------------------------------\n";
+
+  add_entities(
+    graph_cache,
+  {
+    // topic1
+    {"reader1", "topic1", "Str", true},
+    {"writer1", "topic1", "Str", false},
+  });
+
+  // Associate entities
+  associate_entities(
+    graph_cache,
+  {
+    // participant1, ns1, node1
+    {"reader1", true, "participant1", "ns1", "node1"},
+    {"writer1", false, "participant1", "ns1", "node2"},
+  });
+  std::ostringstream stream_case3;
+  stream_case3 << graph_cache;
+  ASSERT_STREQ(stream_case3.str().c_str(), graph_cache_case3_str.c_str());
 }
 
 TEST(test_failing_allocators, failing_allocators)
@@ -1222,5 +1267,28 @@ TEST(test_failing_allocators, failing_allocators)
     ret = graph_cache.get_node_names(&names, &namespaces, nullptr, &allocator);
     EXPECT_EQ(ret, RMW_RET_INVALID_ARGUMENT);
     rcutils_reset_error();
+  }
+
+  {
+    rcutils_allocator_t allocator = rcutils_get_default_allocator();
+    rmw_names_and_types_t names_and_types = rmw_get_zero_initialized_names_and_types();
+    rmw_ret_t ret = graph_cache.get_writer_names_and_types_by_node(
+      "node_name",
+      "node_namespace",
+      identity_demangle,
+      identity_demangle,
+      &allocator,
+      &names_and_types);
+    EXPECT_EQ(ret, RMW_RET_NODE_NAME_NON_EXISTENT);
+    rcutils_reset_error();
+    rcutils_allocator_t zero_allocator = rcutils_get_zero_initialized_allocator();
+    ret = graph_cache.get_writer_names_and_types_by_node(
+      "node_name",
+      "node_namespace",
+      identity_demangle,
+      identity_demangle,
+      &zero_allocator,
+      &names_and_types);
+    EXPECT_EQ(ret, RMW_RET_INVALID_ARGUMENT);
   }
 }
