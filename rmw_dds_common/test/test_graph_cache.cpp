@@ -1238,6 +1238,10 @@ TEST(test_failing_allocators, failing_allocators)
 {
   GraphCache graph_cache;
 
+  EXPECT_EQ(
+    graph_cache.get_reader_count("topic_name", nullptr),
+    RMW_RET_INVALID_ARGUMENT);
+
   {
     rcutils_allocator_t failing_allocator = get_failing_allocator();
     rcutils_string_array_t names = rcutils_get_zero_initialized_string_array();
@@ -1365,6 +1369,18 @@ TEST(test_failing_allocators, failing_allocators)
       &failing_allocator,
       &topic_endpoint_info_array_sub);
     EXPECT_EQ(ret, RMW_RET_BAD_ALLOC);
+    rcutils_reset_error();
+  }
+  {
+    rmw_topic_endpoint_info_array_t topic_endpoint_info_array_sub =
+      rmw_get_zero_initialized_topic_endpoint_info_array();
+    rcutils_allocator_t allocator = rcutils_get_default_allocator();
+    rmw_ret_t ret = graph_cache.get_readers_info_by_topic(
+      "topic1",
+      identity_demangle,
+      &allocator,
+      &topic_endpoint_info_array_sub);
+    EXPECT_EQ(ret, RMW_RET_OK);
     rcutils_reset_error();
   }
 }
