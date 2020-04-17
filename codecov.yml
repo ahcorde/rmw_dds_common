@@ -1,2 +1,4 @@
 fixes:
   - "ros_ws/src/rmw_dds_common/::"
+ignore:
+  - "ros_ws/build"
